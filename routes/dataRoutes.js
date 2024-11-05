@@ -16,10 +16,10 @@ router.post('/manage-container', async (req, res) => {
 
         if (state === 'start') {
             await container.start();
-            return res.json({ message: `Container ${containerName} started` });
+            return res.json({ message: `Bot ${containerName} started` });
         } else if (state === 'stop') {
             await container.stop();
-            return res.json({ message: `Container ${containerName} stopped` });
+            return res.json({ message: `Bot ${containerName} stopped` });
         } else {
             return res.status(400).json({ message: 'Invalid state. Use "start" or "stop".' });
         }
