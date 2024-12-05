@@ -76,6 +76,7 @@ router.post('/create-container', async (req, res) => {
             `COST_GPT_INPUT=${COST_GPT_INPUT || 0.00018}`,
             `COST_GPT_OUTPUT=${COST_GPT_OUTPUT || 0.00072}`,
             `COST_GPT_EXTRA=${COST_GPT_EXTRA || 0.0005}`,
+            'GOOGLE_APPLICATION_CREDENTIALS="google-credetials.json"',
             `GPT_MODEL=${GPT_MODEL}`,
             `PORT=${port}`
         ];
