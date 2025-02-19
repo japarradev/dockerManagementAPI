@@ -19,7 +19,7 @@ router.post('/update-container', async (req, res) => {
       },
       CapAdd: ['SYS_ADMIN'],
       RestartPolicy: {
-        Name: 'always'
+        Name: 'no'
       }
     }
     const containerConfig = {
@@ -55,8 +55,7 @@ router.post('/update-container', async (req, res) => {
       console.log(`Failed to remove container: ${err.message}`)
     }
     console.log(containerConfig)
-    const newContainer = await docker.createContainer(containerConfig)
-    await newContainer.start()
+    await docker.createContainer(containerConfig)
 
     res.status(200).send({ message: 'Container updated successfully' })
   } catch (error) {

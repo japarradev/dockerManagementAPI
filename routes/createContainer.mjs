@@ -16,7 +16,7 @@ router.post('/create-container', async (req, res) => {
     },
     CapAdd: ['SYS_ADMIN'],
     RestartPolicy: {
-      Name: 'always'
+      Name: 'no'
     }
   }
 
@@ -51,7 +51,7 @@ router.post('/create-container', async (req, res) => {
   try {
     const container = await docker.createContainer(containerConfig)
     console.log(`Container ${container.id} created`)
-    await container.start()
+    // await container.start()
     console.log(`Container ${container.id} started`)
     res.status(201).send({ message: 'Container created successfully', containerId: container.id })
   } catch (error) {
