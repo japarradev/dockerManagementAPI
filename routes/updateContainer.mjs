@@ -49,7 +49,10 @@ router.post('/update-container', async (req, res) => {
 
     const container = docker.getContainer(name)
     try {
-      await container.stop()
+      const containerInfo = await container.inspect()
+      if (containerInfo.State.Running) {
+        await container.stop()
+      }
       await container.remove()
     } catch (err) {
       console.log(`Failed to remove container: ${err.message}`)
