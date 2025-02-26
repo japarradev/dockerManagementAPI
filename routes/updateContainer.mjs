@@ -19,7 +19,7 @@ router.post('/update-container', async (req, res) => {
       },
       CapAdd: ['SYS_ADMIN'],
       RestartPolicy: {
-        Name: 'no'
+        Name: 'always'
       }
     }
     const containerConfig = {

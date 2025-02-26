@@ -16,7 +16,7 @@ router.post('/create-container', async (req, res) => {
     },
     CapAdd: ['SYS_ADMIN'],
     RestartPolicy: {
-      Name: 'no'
+      Name: 'always'
     }
   }
 
