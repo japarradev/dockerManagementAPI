@@ -14,6 +14,7 @@ router.post('/create-container', async (req, res) => {
         }
       ]
     },
+    Binds: [`${process.cwd()}/sessions/bot_sessions:/${name}/bot_sessions:rw`],
     CapAdd: ['SYS_ADMIN'],
     RestartPolicy: {
       Name: 'always'
@@ -22,18 +23,14 @@ router.post('/create-container', async (req, res) => {
 
   const containerConfig = {
     Image,
-    name, // nombre del container
+    name,
     Env: Object.entries(Env).map(([key, value]) => `${key}=${value}`),
     ExposedPorts: { [`${Port}/tcp`]: {} },
-    HostConfig: {
-      ...hostConfig,
-      Binds: [
-        `${process.cwd()}/sessions/${name}/bot_sessions:/app/bot_sessions:rw`
-      ]
-    },
+    HostConfig: hostConfig,
     Volumes: {
       '/app/bot_sessions': {}
     }
+
   }
   try {
     await docker.pull(Image, (err, stream) => {

@@ -17,6 +17,7 @@ router.post('/update-container', async (req, res) => {
           }
         ]
       },
+      Binds: [`${process.cwd()}/sessions/bot_sessions:/${name}/bot_sessions:rw`],
       CapAdd: ['SYS_ADMIN'],
       RestartPolicy: {
         Name: 'always'
@@ -27,15 +28,11 @@ router.post('/update-container', async (req, res) => {
       name,
       Env: Object.entries(Env).map(([key, value]) => `${key}=${value}`),
       ExposedPorts: { [`${Port}/tcp`]: {} },
-      HostConfig: {
-        ...hostConfig,
-        Binds: [
-        `${process.cwd()}/sessions/${name}/bot_sessions:/app/bot_sessions:rw`
-        ]
-      },
+      HostConfig: hostConfig,
       Volumes: {
         '/app/bot_sessions': {}
       }
+
     }
     await docker.pull(Image, (err, stream) => {
       if (err) {
