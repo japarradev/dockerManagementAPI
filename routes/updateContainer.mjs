@@ -1,5 +1,6 @@
 import express from 'express'
 import Docker from 'dockerode'
+import path from 'path'
 
 const docker = new Docker()
 const router = express.Router()
@@ -9,6 +10,9 @@ router.post('/update-container', async (req, res) => {
   const { Image, name, Env, Port } = req.body
 
   try {
+    // Crear la carpeta en el host si no existe
+    const hostSessionsPath = path.join('/sessions', name)
+
     const hostConfig = {
       PortBindings: {
         [`${Port}/tcp`]: [
@@ -17,7 +21,7 @@ router.post('/update-container', async (req, res) => {
           }
         ]
       },
-      Binds: [`${process.cwd()}/sessions/bot_sessions:/${name}/bot_sessions:rw`],
+      Binds: [`${hostSessionsPath}:/app/bot_sessions:rw`],
       CapAdd: ['SYS_ADMIN'],
       RestartPolicy: {
         Name: 'always'
@@ -32,23 +36,16 @@ router.post('/update-container', async (req, res) => {
       Volumes: {
         '/app/bot_sessions': {}
       }
-
     }
-    await docker.pull(Image, (err, stream) => {
-      if (err) {
-        throw new Error(`Failed to pull image: ${err.message}`)
-      }
-      docker.modem.followProgress(stream, onFinished, onProgress)
 
-      function onFinished (err, output) {
-        if (err) {
-          throw new Error(`Failed to pull image: ${err.message}`)
-        }
-      }
-
-      function onProgress (event) {
-        console.log(event)
-      }
+    await new Promise((resolve, reject) => {
+      docker.pull(Image, (err, stream) => {
+        if (err) return reject(err)
+        docker.modem.followProgress(stream, (err) => {
+          if (err) return reject(err)
+          resolve()
+        })
+      })
     })
 
     const container = docker.getContainer(name)
