@@ -27,8 +27,15 @@ router.post('/update-container', async (req, res) => {
       name,
       Env: Object.entries(Env).map(([key, value]) => `${key}=${value}`),
       ExposedPorts: { [`${Port}/tcp`]: {} },
-      HostConfig: hostConfig
-
+      HostConfig: {
+        ...hostConfig,
+        Binds: [
+        `${process.cwd()}/sessions/${name}/bot_sessions:/app/bot_sessions:rw`
+        ]
+      },
+      Volumes: {
+        '/app/bot_sessions': {}
+      }
     }
     await docker.pull(Image, (err, stream) => {
       if (err) {

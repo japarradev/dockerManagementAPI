@@ -22,11 +22,18 @@ router.post('/create-container', async (req, res) => {
 
   const containerConfig = {
     Image,
-    name,
+    name, // nombre del container
     Env: Object.entries(Env).map(([key, value]) => `${key}=${value}`),
     ExposedPorts: { [`${Port}/tcp`]: {} },
-    HostConfig: hostConfig
-
+    HostConfig: {
+      ...hostConfig,
+      Binds: [
+        `${process.cwd()}/sessions/${name}/bot_sessions:/app/bot_sessions:rw`
+      ]
+    },
+    Volumes: {
+      '/app/bot_sessions': {}
+    }
   }
   try {
     await docker.pull(Image, (err, stream) => {
