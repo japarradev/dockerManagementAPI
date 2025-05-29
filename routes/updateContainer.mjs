@@ -10,7 +10,6 @@ router.post('/update-container', async (req, res) => {
   const { Image, name, Env, Port } = req.body
 
   try {
-    // Crear la carpeta en el host si no existe
     const hostSessionsPath = path.join('/sessions', name)
 
     const hostConfig = {

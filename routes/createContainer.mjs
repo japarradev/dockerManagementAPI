@@ -4,10 +4,9 @@ import path from 'path'
 const router = express.Router()
 const docker = new Docker()
 
-router.post('create-container', async (req, res) => {
+router.post('/create-container', async (req, res) => {
   const { Image, name, Env, Port } = req.body
 
-  // Crear la carpeta en el host si no existe
   const hostSessionsPath = path.join('/sessions', name)
 
   const hostConfig = {
@@ -51,6 +50,7 @@ router.post('create-container', async (req, res) => {
     res.status(201).send({ message: 'Container created successfully', containerId: container.id })
   } catch (error) {
     res.status(500).send({ error: `Failed to create or start container: ${error.message}` })
+    console.error(`Error creating container: ${error.message}`)
   }
 })
 
