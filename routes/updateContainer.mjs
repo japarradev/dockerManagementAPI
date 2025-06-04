@@ -59,7 +59,7 @@ router.post('/update-container', async (req, res) => {
     }
     console.log(containerConfig)
     await docker.createContainer(containerConfig)
-
+    await docker.getContainer(name).start()
     res.status(200).send({ message: 'Container updated successfully' })
   } catch (error) {
     res.status(500).send({ error: error.message })
