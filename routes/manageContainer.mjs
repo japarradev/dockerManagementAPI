@@ -8,7 +8,7 @@ router.post('/manage-container', async (req, res) => {
   const { containerName, state } = req.body
 
   if (!containerName || !state) {
-    return res.status(400).json({ message: 'Container name and state are required' })
+    return res.status(400).json({ message: 'Nombre del contenedor es requerido' })
   }
 
   try {
@@ -16,15 +16,15 @@ router.post('/manage-container', async (req, res) => {
 
     if (state === 'start') {
       await container.start()
-      return res.json({ message: `Bot ${containerName} started` })
+      return res.json({ message: `Bot ${containerName} ha iniciado` })
     } else if (state === 'stop') {
       await container.stop()
-      return res.json({ message: `Bot ${containerName} stopped` })
+      return res.json({ message: `Bot ${containerName} se ha detenido` })
     } else if (state === 'restart') {
       await container.restart()
-      return res.json({ message: `Bot ${containerName} restarted` })
+      return res.json({ message: `Bot ${containerName} se ha reiniciado` })
     } else {
-      return res.status(400).json({ message: 'Invalid state. Use "start", "stop", or "restart".' })
+      return res.status(400).json({ message: 'Error el proceso contáctese con el soporte técnico' })
     }
   } catch (error) {
     console.error(error)

@@ -47,9 +47,9 @@ router.post('/create-container', async (req, res) => {
     })
     const container = await docker.createContainer(containerConfig)
     await container.start()
-    res.status(201).send({ message: 'Container created successfully', containerId: container.id })
+    res.status(201).send({ message: 'Bot creado satisfactoriamente', containerId: container.id })
   } catch (error) {
-    res.status(500).send({ error: `Failed to create or start container: ${error.message}` })
+    res.status(500).send({ error: `Fallo al cre: ${error.message}` })
     console.error(`Error creating container: ${error.message}`)
   }
 })

@@ -15,9 +15,9 @@ router.post('/remove-session', async (req, res) => {
   try {
     if (fs.existsSync(dirPath)) {
       fs.rmSync(dirPath, { recursive: true, force: true })
-      return res.json({ message: `Directory /sessions/${containerName} removed` })
+      return res.json({ message: 'El bot se ha desvinculado sin problemas' })
     } else {
-      return res.status(404).json({ error: 'Directory does not exist' })
+      return res.status(404).json({ error: 'No hay una sessión activa en este momento' })
     }
   } catch (error) {
     return res.status(500).json({ error: error.message })
