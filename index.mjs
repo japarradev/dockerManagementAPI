@@ -13,7 +13,7 @@ app.use(express.json())
 // Import routes
 
 // Use the routes
-app.use('/api/v1', routes)
+app.use('/v1', routes)
 
 // Start the server
 app.listen(port, () => {
