@@ -10,37 +10,32 @@ router.post('/create-container', async (req, res) => {
   const hostSessionsPath = path.join('/sessions', name)
 
   const hostConfig = {
-    PortBindings: {
-      [`${Port}/tcp`]: [
-        {
-          HostPort: `${Port}`
-        }
-      ]
-    },
+    // Eliminar PortBindings ya que no los necesitas según tu comando Docker
     Binds: [`${hostSessionsPath}:/app/bot_sessions:rw`],
     CapAdd: ['SYS_ADMIN'],
     RestartPolicy: {
       Name: 'always'
-    }
+    },
+    // Agregar la red de Traefik
+    NetworkMode: 'traefik'
   }
 
   const containerConfig = {
     Image,
     name,
-    Hostname: guid, // Agregar hostname
+    Hostname: guid,
     Env: Object.entries(Env).map(([key, value]) => `${key}=${value}`),
-    ExposedPorts: { [`${Port}/tcp`]: {} },
+    // Eliminar ExposedPorts ya que no los necesitas
     Labels: {
-      // Etiquetas de Traefik
-      [`traefik.http.routers.${guid}.rule`]: `Host(\`${server}\`) && PathPrefix(\`/${guid}\`)`,
+      // Etiquetas de Traefik corregidas
+      'traefik.enable': 'true',
+      [`traefik.http.routers.${guid}.rule`]: `PathPrefix(\`/${guid}\`)`,
       [`traefik.http.routers.${guid}.entrypoints`]: 'websecure',
       [`traefik.http.routers.${guid}.tls`]: 'true',
       [`traefik.http.routers.${guid}.tls.certresolver`]: 'letsencrypt',
       [`traefik.http.routers.${guid}.middlewares`]: `strip-${guid}`,
       [`traefik.http.middlewares.strip-${guid}.stripprefix.prefixes`]: `/${guid}`,
-      [`traefik.http.services.${guid}.loadbalancer.server.port`]: Port.toString(),
-      // Habilitar Traefik para este contenedor
-      'traefik.enable': 'true'
+      [`traefik.http.services.${guid}.loadbalancer.server.port`]: Port.toString()
     },
     HostConfig: hostConfig,
     Volumes: {
@@ -58,12 +53,14 @@ router.post('/create-container', async (req, res) => {
         })
       })
     })
+
     const container = await docker.createContainer(containerConfig)
     await container.start()
+
     res.status(201).send({
       message: 'Bot creado satisfactoriamente',
       containerId: container.id,
-      hostname: name,
+      hostname: guid,
       domain: server,
       traefik_url: `https://${server}/${guid}`
     })
