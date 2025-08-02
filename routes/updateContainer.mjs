@@ -7,7 +7,7 @@ const router = express.Router()
 
 router.post('/update-container', async (req, res) => {
   console.log('updateContainer')
-  const { Image, name, Env, Port } = req.body
+  const { Image, name, guid, server, Env, Port } = req.body
 
   try {
     const hostSessionsPath = path.join('/sessions', name)
@@ -26,11 +26,25 @@ router.post('/update-container', async (req, res) => {
         Name: 'always'
       }
     }
+
     const containerConfig = {
       Image,
       name,
+      Hostname: name, // Agregar hostname
       Env: Object.entries(Env).map(([key, value]) => `${key}=${value}`),
       ExposedPorts: { [`${Port}/tcp`]: {} },
+      Labels: {
+        // Etiquetas de Traefik
+        [`traefik.http.routers.${name}.rule`]: `Host(\`${server}\`) && PathPrefix(\`/${guid}\`)`,
+        [`traefik.http.routers.${name}.entrypoints`]: 'websecure',
+        [`traefik.http.routers.${name}.tls`]: 'true',
+        [`traefik.http.routers.${name}.tls.certresolver`]: 'letsencrypt',
+        [`traefik.http.routers.${name}.middlewares`]: `strip-${name}`,
+        [`traefik.http.middlewares.strip-${name}.stripprefix.prefixes`]: `/${guid}`,
+        [`traefik.http.services.${name}.loadbalancer.server.port`]: Port.toString(),
+        // Habilitar Traefik para este contenedor
+        'traefik.enable': 'true'
+      },
       HostConfig: hostConfig,
       Volumes: {
         '/app/bot_sessions': {}
@@ -57,10 +71,18 @@ router.post('/update-container', async (req, res) => {
     } catch (err) {
       console.log(`Failed to remove container: ${err.message}`)
     }
+
     console.log(containerConfig)
-    await docker.createContainer(containerConfig)
-    await docker.getContainer(name).start()
-    res.status(200).send({ message: 'Container updated successfully' })
+    const newContainer = await docker.createContainer(containerConfig)
+    await newContainer.start()
+
+    res.status(200).send({
+      message: 'Container updated successfully',
+      containerId: newContainer.id,
+      hostname: name,
+      domain: server,
+      traefik_url: `https://${server}/${guid}`
+    })
   } catch (error) {
     res.status(500).send({ error: error.message })
   }

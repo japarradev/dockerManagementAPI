@@ -5,7 +5,7 @@ const router = express.Router()
 const docker = new Docker()
 
 router.post('/create-container', async (req, res) => {
-  const { Image, name, Env, Port } = req.body
+  const { Image, name, guid, server, Env, Port } = req.body
 
   const hostSessionsPath = path.join('/sessions', name)
 
@@ -27,8 +27,21 @@ router.post('/create-container', async (req, res) => {
   const containerConfig = {
     Image,
     name,
+    Hostname: name, // Agregar hostname
     Env: Object.entries(Env).map(([key, value]) => `${key}=${value}`),
     ExposedPorts: { [`${Port}/tcp`]: {} },
+    Labels: {
+      // Etiquetas de Traefik
+      [`traefik.http.routers.${name}.rule`]: `Host(\`${server}\`) && PathPrefix(\`/${guid}\`)`,
+      [`traefik.http.routers.${name}.entrypoints`]: 'websecure',
+      [`traefik.http.routers.${name}.tls`]: 'true',
+      [`traefik.http.routers.${name}.tls.certresolver`]: 'letsencrypt',
+      [`traefik.http.routers.${name}.middlewares`]: `strip-${name}`,
+      [`traefik.http.middlewares.strip-${name}.stripprefix.prefixes`]: `/${guid}`,
+      [`traefik.http.services.${name}.loadbalancer.server.port`]: Port.toString(),
+      // Habilitar Traefik para este contenedor
+      'traefik.enable': 'true'
+    },
     HostConfig: hostConfig,
     Volumes: {
       '/app/bot_sessions': {}
@@ -47,9 +60,15 @@ router.post('/create-container', async (req, res) => {
     })
     const container = await docker.createContainer(containerConfig)
     await container.start()
-    res.status(201).send({ message: 'Bot creado satisfactoriamente', containerId: container.id })
+    res.status(201).send({
+      message: 'Bot creado satisfactoriamente',
+      containerId: container.id,
+      hostname: name,
+      domain: server,
+      traefik_url: `https://${server}/${guid}`
+    })
   } catch (error) {
-    res.status(500).send({ error: `Fallo al cre: ${error.message}` })
+    res.status(500).send({ error: `Fallo al crear: ${error.message}` })
     console.error(`Error creating container: ${error.message}`)
   }
 })
