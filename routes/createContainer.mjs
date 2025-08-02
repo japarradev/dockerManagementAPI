@@ -27,18 +27,18 @@ router.post('/create-container', async (req, res) => {
   const containerConfig = {
     Image,
     name,
-    Hostname: name, // Agregar hostname
+    Hostname: guid, // Agregar hostname
     Env: Object.entries(Env).map(([key, value]) => `${key}=${value}`),
     ExposedPorts: { [`${Port}/tcp`]: {} },
     Labels: {
       // Etiquetas de Traefik
-      [`traefik.http.routers.${name}.rule`]: `Host(\`${server}\`) && PathPrefix(\`/${guid}\`)`,
-      [`traefik.http.routers.${name}.entrypoints`]: 'websecure',
-      [`traefik.http.routers.${name}.tls`]: 'true',
-      [`traefik.http.routers.${name}.tls.certresolver`]: 'letsencrypt',
-      [`traefik.http.routers.${name}.middlewares`]: `strip-${name}`,
-      [`traefik.http.middlewares.strip-${name}.stripprefix.prefixes`]: `/${guid}`,
-      [`traefik.http.services.${name}.loadbalancer.server.port`]: Port.toString(),
+      [`traefik.http.routers.${guid}.rule`]: `Host(\`${server}\`) && PathPrefix(\`/${guid}\`)`,
+      [`traefik.http.routers.${guid}.entrypoints`]: 'websecure',
+      [`traefik.http.routers.${guid}.tls`]: 'true',
+      [`traefik.http.routers.${guid}.tls.certresolver`]: 'letsencrypt',
+      [`traefik.http.routers.${guid}.middlewares`]: `strip-${guid}`,
+      [`traefik.http.middlewares.strip-${guid}.stripprefix.prefixes`]: `/${guid}`,
+      [`traefik.http.services.${guid}.loadbalancer.server.port`]: Port.toString(),
       // Habilitar Traefik para este contenedor
       'traefik.enable': 'true'
     },
