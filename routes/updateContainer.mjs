@@ -35,7 +35,7 @@ router.post('/update-container', async (req, res) => {
         [`traefik.http.routers.${guid}.rule`]: `PathPrefix(\`/${guid}\`)`,
         [`traefik.http.routers.${guid}.entrypoints`]: 'websecure',
         [`traefik.http.routers.${guid}.tls`]: 'true',
-        [`traefik.http.routers.${guid}.tls.certresolver`]: 'letsencrypt',
+        [`traefik.http.routers.${guid}.rule`]: `Host(\`${server}\`)`,
         [`traefik.http.routers.${guid}.middlewares`]: `strip-${guid}`,
         [`traefik.http.middlewares.strip-${guid}.stripprefix.prefixes`]: `/${guid}`,
         [`traefik.http.services.${guid}.loadbalancer.server.port`]: Port.toString()
